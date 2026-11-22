@@ -49,9 +49,9 @@ The tests use controlled fixtures for external data. Passing tests checks applic
 
 ## Team
 
+- Anushka Sharma
 - Bhavneet Rajput
-- Aryan
-- Devashish Anand
+- Dhani Sinha
 
 ## Prototype URL
 
