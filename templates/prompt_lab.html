@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ app_name }} | Prompt Engineering Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}" />
+  </head>
+  <body>
+    <main class="prompt-lab-shell">
+      <header class="prompt-lab-header">
+        <div>
+          <p class="eyebrow">Prompt Engineering</p>
+          <h1>ORCA Prompt Laboratory</h1>
+        </div>
+        <a class="prompt-back" href="/">Back to ORCA</a>
+      </header>
+
+      <section class="prompt-layout">
+        <div class="prompt-runner">
+          <label for="strategy">Prompting strategy</label>
+          <select id="strategy">
+            <option value="few-shot">Few-shot prompting</option>
+            <option value="zero-shot">Zero-shot prompting</option>
+          </select>
+
+          <label for="testInput">Test input</label>
+          <textarea id="testInput" rows="4" placeholder="Enter an ocean or coastal question"></textarea>
+
+          <label for="testContext">Optional retrieved context</label>
+          <textarea id="testContext" rows="3" placeholder="Add weather, satellite, or boundary context"></textarea>
+
+          <button id="runPrompt" type="button">Run prompt</button>
+          <p id="runStatus" class="prompt-status" role="status"></p>
+
+          <article class="prompt-output">
+            <h2>Model output</h2>
+            <pre id="modelOutput">Run an input to compare prompt behavior.</pre>
+          </article>
+        </div>
+
+        <aside class="prompt-evidence">
+          <section>
+            <h2>Iteration log</h2>
+            {% for item in prompt_versions %}
+            <article class="iteration-card">
+              <strong>{{ item.version }}</strong>
+              <p>{{ item.change }}</p>
+              <details><summary>View prompt</summary><p>{{ item.prompt }}</p></details>
+            </article>
+            {% endfor %}
+          </section>
+
+          <section>
+            <h2>Test table ({{ test_inputs|length }} inputs)</h2>
+            <div class="test-table">
+              {% for item in test_inputs %}
+              <article>
+                <strong>{{ item.id }}. {{ item.category }}</strong>
+                <p>{{ item.input }}</p>
+                <small>Expected: {{ item.expected }} · {{ item.result }}</small>
+              </article>
+              {% endfor %}
+            </div>
+          </section>
+        </aside>
+      </section>
+    </main>
+    <script src="{{ url_for('static', filename='prompt_lab.js') }}" defer></script>
+  </body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#062a35" />
+    <title>{{ app_name }} | Ocean & Coastal Assistant</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='chat.css') }}" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="ORCA home">
+          <span class="brand-mark" aria-hidden="true">O</span>
+          <span><strong>{{ app_name }}</strong><small>Ocean & coastal assistant</small></span>
+        </a>
+
+        <div class="location-control">
+          <label for="locationSelect">Coastal location</label>
+          <select id="locationSelect">
+            <option value="">Choose a location (optional)</option>
+            {% for key, name in locations %}
+            <option value="{{ key }}">{{ name }}</option>
+            {% endfor %}
+          </select>
+          <p>Or include coordinates in your message, e.g. <code>13.08, 80.35</code>.</p>
+        </div>
+
+        <nav class="feature-list" aria-label="Try a feature">
+          <p class="side-heading">TRY A FEATURE</p>
+          <button type="button" class="feature-button" data-query="What causes ocean tides?">
+            <span class="feature-icon">01</span><span><strong>Ocean science</strong><small>Ask a general question</small></span>
+          </button>
+          <button type="button" class="feature-button" data-query="What are the sea conditions tomorrow morning?">
+            <span class="feature-icon">02</span><span><strong>Sea conditions</strong><small>Waves, wind & forecast window</small></span>
+          </button>
+          <button type="button" class="feature-button" data-query="Find a potential fishing zone">
+            <span class="feature-icon">03</span><span><strong>Fishing-zone estimate</strong><small>Official SST / chlorophyll feed</small></span>
+          </button>
+          <button type="button" class="feature-button" data-query="Check nearby coastal boundaries">
+            <span class="feature-icon">04</span><span><strong>Boundary distances</strong><small>Illustrative geofences only</small></span>
+          </button>
+          <button type="button" class="feature-button" data-query="Are there marine weather alerts?">
+            <span class="feature-icon">05</span><span><strong>Forecast signals</strong><small>Weather-code / wave indicators</small></span>
+          </button>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="note-symbol" aria-hidden="true">i</span>
+          <p><strong>Prototype, not a safety service.</strong> Weather comes from live feeds when available. PFZ data is only shown from configured official feeds. Always check official marine advisories.</p>
+        </div>
+      </aside>
+
+      <main class="main-panel">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Ocean knowledge · local marine indicators</p>
+            <h1>Ask ORCA</h1>
+          </div>
+          <a class="prompt-lab-link" href="/prompt-lab">Prompt Lab</a>
+          <div class="connection-status" id="statusPill" role="status" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span><span>Ready</span>
+          </div>
+        </header>
+
+        <section class="conversation" aria-label="Conversation with ORCA">
+          <div class="chat-log" id="chatLog" aria-live="polite" aria-relevant="additions">
+            <article class="welcome-card">
+              <span class="welcome-icon" aria-hidden="true">≈</span>
+              <p class="eyebrow">Welcome aboard</p>
+              <h2>Explore the ocean or check a coastal location.</h2>
+              <p>Ask a general ocean-science question, or choose a coastal location and ask about conditions, fishing-zone estimates, alerts, or nearby boundaries.</p>
+              <div class="quick-prompts">
+                <button type="button" data-query="What causes ocean tides?">How do tides work?</button>
+                <button type="button" data-query="Why are coral reefs bleaching?">Why are reefs bleaching?</button>
+                <button type="button" data-query="Is it safe to go fishing tomorrow morning?">Check tomorrow's conditions</button>
+              </div>
+            </article>
+          </div>
+
+          <form id="queryForm" class="composer">
+            <label class="sr-only" for="queryInput">Ask ORCA a question</label>
+            <textarea id="queryInput" rows="2" placeholder="Ask about tides, marine life, sea conditions, PFZ estimates, or boundaries…" required></textarea>
+            <div class="composer-footer">
+              <span>Enter to send · Shift+Enter for a new line</span>
+              <button id="sendButton" type="submit"><span>Send</span><span aria-hidden="true">↗</span></button>
+            </div>
+          </form>
+        </section>
+        <footer class="main-footer">Demo outputs are for learning and should not guide real-world fishing or navigation.</footer>
+      </main>
+    </div>
+    <script src="{{ url_for('static', filename='app.js', v='20261118-2') }}" defer></script>
+  </body>
+</html>
