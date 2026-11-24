@@ -1,6 +1,6 @@
 # ORCA — Ocean & Coastal Assistant
 
-ORCA is an educational web prototype for exploring ocean science and coastal information. It combines a Flask web app, rule-based query and location parsing, optional Gemini prompt experiments, and marine data lookups.
+ORCA is an educational web prototype for exploring ocean science and coastal information. It combines a Streamlit interface, rule-based query and location parsing, optional Gemini prompt experiments, and marine data lookups. The Flask app and API remain available as an alternate entry point.
 
 > **Important:** ORCA is not an official marine safety, navigation, weather-warning, or fishing service. Its configured boundaries and condition thresholds are illustrative. Always follow official advisories.
 
@@ -37,15 +37,24 @@ Replace the placeholder with a key from Google AI Studio. Keep the key private; 
 - Configured geofences are approximate reference areas, not official boundary data.
 - External services can be unavailable or return incomplete data. Outputs should not be used for real-world safety decisions.
 
-## Run locally (Windows PowerShell)
+## Run locally with Streamlit (Windows PowerShell)
 
-From the ORCA project folder, start the app with its project environment:
+From the ORCA project folder, start the Streamlit app with its project environment:
 
 ```powershell
-.\.venv\bin\python.exe main.py
+.\.venv\bin\python.exe -m streamlit run streamlit_app.py
 ```
 
-Open <http://127.0.0.1:5000> in your browser. Leave the terminal open while using the app, and press `Ctrl+C` to stop it. If your virtual environment uses the standard Windows `Scripts` directory instead of `bin`, replace `.venv\bin\python.exe` with `.venv\Scripts\python.exe`.
+Open <http://localhost:8501> in your browser. Leave the terminal open while using the app, and press `Ctrl+C` to stop it. If your virtual environment uses the standard Windows `Scripts` directory instead of `bin`, replace `.venv\bin\python.exe` with `.venv\Scripts\python.exe`.
+
+The original Flask interface and API can still be started with `.\.venv\bin\python.exe main.py` at <http://127.0.0.1:5000>.
+
+## Deploy to Streamlit Community Cloud
+
+1. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) with GitHub.
+2. Create an app using repository `Bhavneet31r/ORCA`, branch `main`, and main file path `streamlit_app.py`.
+3. Deploy the app. Community Cloud installs the packages listed in `requirements.txt` and provides a `*.streamlit.app` URL.
+4. To enable Gemini, add `GEMINI_API_KEY = "your-key"` in the app's **Settings > Secrets**. Never commit the key to GitHub.
 
 ## Run tests
 
@@ -57,7 +66,8 @@ The tests use controlled fixtures for external data. Passing tests checks applic
 
 ## Project structure
 
-- `main.py` — Flask application and API routes
+- `streamlit_app.py` — Streamlit interface
+- `main.py` — shared analysis logic, Flask application, and API routes
 - `intent.py`, `language.py` — query, intent, location, and language handling
 - `data_sources.py` — weather and satellite data providers
 - `geo_utils.py`, `config.py` — geographic calculations and demonstration configuration
