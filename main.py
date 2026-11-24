@@ -32,7 +32,7 @@ from intent import PART_HOURS, detect_intents, parse_query
 from language import LANG_NAMES, t
 from models import AnalysisResult, Location, Session
 from ocean_knowledge import answer_ocean_question
-from prompt_engineering import PROMPT_VERSIONS, TEST_INPUTS, build_prompt, call_gemini
+from prompt_engineering import MODEL_NAME, PROMPT_VERSIONS, TEST_INPUTS, build_prompt, call_gemini
 
 
 def _safe_level(wave_m: float, gust_kmh: float) -> str:
@@ -479,7 +479,7 @@ def create_app() -> Flask:
         return jsonify({
             "prompt_versions": PROMPT_VERSIONS,
             "test_inputs": TEST_INPUTS,
-            "model": "Gemini 2.5 Flash",
+            "model": MODEL_NAME,
             "model_configured": bool(
                 __import__("os").getenv("GEMINI_API_KEY")
                 or __import__("os").getenv("GOOGLE_API_KEY")

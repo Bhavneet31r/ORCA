@@ -16,7 +16,16 @@ ORCA is an educational web prototype for exploring ocean science and coastal inf
 
 ## Gemini integration
 
-The Prompt Lab uses **Gemini 2.5 Flash** when `GEMINI_API_KEY` or `GOOGLE_API_KEY` is configured in the deployment environment. Without a key, the lab reports that Gemini is not configured. Never commit API keys, passwords, or other credentials. `.env` files are ignored by Git. If a key has been exposed, revoke it and create a replacement.
+The Prompt Lab uses **Gemini 3.5 Flash-Lite** when `GEMINI_API_KEY` or `GOOGLE_API_KEY` is configured in the deployment environment. Without a key, the lab reports that Gemini is not configured. Never commit API keys, passwords, or other credentials. `.env` files are ignored by Git. If a key has been exposed, revoke it and create a replacement.
+
+To enable live Gemini responses locally, stop the running app and set your own key in the same PowerShell window before starting it:
+
+```powershell
+$env:GEMINI_API_KEY = "your-key-here"
+.\.venv\bin\python.exe main.py
+```
+
+Replace the placeholder with a key from Google AI Studio. Keep the key private; do not paste it into the browser or commit it to the project. Without a key, the local app still runs, but Prompt Lab generation displays a not-configured message.
 
 ## Data sources and limitations
 
@@ -28,10 +37,20 @@ The Prompt Lab uses **Gemini 2.5 Flash** when `GEMINI_API_KEY` or `GOOGLE_API_KE
 - Configured geofences are approximate reference areas, not official boundary data.
 - External services can be unavailable or return incomplete data. Outputs should not be used for real-world safety decisions.
 
+## Run locally (Windows PowerShell)
+
+From the ORCA project folder, start the app with its project environment:
+
+```powershell
+.\.venv\bin\python.exe main.py
+```
+
+Open <http://127.0.0.1:5000> in your browser. Leave the terminal open while using the app, and press `Ctrl+C` to stop it. If your virtual environment uses the standard Windows `Scripts` directory instead of `bin`, replace `.venv\bin\python.exe` with `.venv\Scripts\python.exe`.
+
 ## Run tests
 
 ```powershell
-python -m pytest -q
+.\.venv\bin\python.exe -m pytest -q
 ```
 
 The tests use controlled fixtures for external data. Passing tests checks application behavior; it does not validate scientific accuracy or real-world safety.
@@ -49,9 +68,9 @@ The tests use controlled fixtures for external data. Passing tests checks applic
 
 ## Team
 
-- Anushka Sharma
 - Bhavneet Rajput
 - Dhani Sinha
+- Anushka Sharma
 
 ## Prototype URL
 

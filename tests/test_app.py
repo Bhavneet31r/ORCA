@@ -366,6 +366,7 @@ def test_prompt_lab_page_and_engineering_evidence(client):
     assert len(PROMPT_VERSIONS) >= 3
     assert len(TEST_INPUTS) >= 10
     assert evidence["prompt_versions"][-1]["version"] == "v3"
+    assert evidence["model"] == prompt_engineering.MODEL_NAME
     assert "prompt-injection defense" in evidence["techniques"]
 
 
@@ -413,6 +414,7 @@ def test_gemini_request_uses_verified_certifi_tls_context(monkeypatch):
         calls["context"] = context
         return FakeResponse()
 
+    monkeypatch.delenv("GEMINI_MODEL", raising=False)
     monkeypatch.setenv("GEMINI_API_KEY", "test-key")
     monkeypatch.setattr(prompt_engineering.request, "urlopen", fake_urlopen)
 
@@ -420,6 +422,7 @@ def test_gemini_request_uses_verified_certifi_tls_context(monkeypatch):
 
     assert result["available"] is True
     assert result["answer"] == "Tide answer"
+    assert "/models/gemini-3.5-flash-lite:generateContent" in calls["request"].full_url
     assert calls["timeout"] == 30
     assert calls["context"].verify_mode == prompt_engineering.ssl.CERT_REQUIRED
     assert calls["context"].check_hostname is True

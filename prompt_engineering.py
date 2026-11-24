@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 import certifi
 
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
 PROMPT_VERSIONS = [
     {
