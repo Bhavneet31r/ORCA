@@ -16,16 +16,16 @@ ORCA is an educational web prototype for exploring ocean science and coastal inf
 
 ## Gemini integration
 
-The Prompt Lab uses **Gemini 3.5 Flash-Lite** when `GEMINI_API_KEY` or `GOOGLE_API_KEY` is configured in the deployment environment. Without a key, the lab reports that Gemini is not configured. Never commit API keys, passwords, or other credentials. `.env` files are ignored by Git. If a key has been exposed, revoke it and create a replacement.
+The Prompt Lab uses **Gemini 3.5 Flash-Lite** when `GEMINI_API_KEY` or `GOOGLE_API_KEY` is configured in the server environment or Streamlit secrets. Without a key, the lab reports that Gemini is not configured. Never commit API keys, passwords, or other credentials. `.env` files are ignored by Git. If a key has been exposed, revoke it and create a replacement.
 
-To enable live Gemini responses locally, stop the running app and set your own key in the same PowerShell window before starting it:
+To enable live Gemini responses locally, stop the running app and set your own key in the same PowerShell window before starting Streamlit:
 
 ```powershell
 $env:GEMINI_API_KEY = "your-key-here"
-.\.venv\bin\python.exe main.py
+.\.venv\bin\python.exe -m streamlit run streamlit_app.py
 ```
 
-Replace the placeholder with a key from Google AI Studio. Keep the key private; do not paste it into the browser or commit it to the project. Without a key, the local app still runs, but Prompt Lab generation displays a not-configured message.
+Replace the placeholder with a key from Google AI Studio. Keep the key private; do not paste it into the browser or commit it to the project. Without a key, the local app still runs, but Prompt Lab generation displays a not-configured message. Streamlit Community Cloud reads `GEMINI_API_KEY` (or `GOOGLE_API_KEY`) directly from **Settings > Secrets**.
 
 ## Data sources and limitations
 

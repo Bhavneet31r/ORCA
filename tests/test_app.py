@@ -1,4 +1,6 @@
 import datetime as dt
+import sys
+from types import ModuleType
 from urllib.error import URLError
 
 import pytest
@@ -426,3 +428,46 @@ def test_gemini_request_uses_verified_certifi_tls_context(monkeypatch):
     assert calls["timeout"] == 30
     assert calls["context"].verify_mode == prompt_engineering.ssl.CERT_REQUIRED
     assert calls["context"].check_hostname is True
+
+
+def test_gemini_request_uses_streamlit_secret_when_environment_key_is_absent(monkeypatch):
+    class FakeResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self):
+            return b'{"candidates":[{"content":{"parts":[{"text":"Tide answer"}]}}]}'
+
+    calls = {}
+
+    def fake_urlopen(req, timeout, context):
+        calls["request"] = req
+        return FakeResponse()
+
+    fake_streamlit = ModuleType("streamlit")
+    fake_streamlit.secrets = {"GEMINI_API_KEY": "streamlit-test-key"}
+    fake_errors = ModuleType("streamlit.errors")
+
+    class FakeSecretError(Exception):
+        pass
+
+    fake_errors.StreamlitSecretNotFoundError = FakeSecretError
+    monkeypatch.setitem(sys.modules, "streamlit", fake_streamlit)
+    monkeypatch.setitem(sys.modules, "streamlit.errors", fake_errors)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    monkeypatch.delenv("GOOGLE_API_KEY", raising=False)
+    monkeypatch.delenv("GEMINI_MODEL", raising=False)
+    monkeypatch.setattr(prompt_engineering.request, "urlopen", fake_urlopen)
+
+    result = prompt_engineering.call_gemini("system", "user")
+
+    assert result["available"] is True
+    api_key_header = next(
+        value
+        for name, value in calls["request"].headers.items()
+        if name.lower() == "x-goog-api-key"
+    )
+    assert api_key_header == "streamlit-test-key"

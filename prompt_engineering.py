@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 import certifi
 
 
-MODEL_NAME = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+MODEL_NAME = os.getenv("GEMINI_MODEL", "").strip() or "gemini-3.5-flash-lite"
 
 PROMPT_VERSIONS = [
     {
@@ -66,6 +66,42 @@ TEST_INPUTS = [
 ]
 
 
+def _streamlit_secret(name: str) -> str | None:
+    try:
+        import streamlit as st
+    except ModuleNotFoundError as exc:
+        if exc.name != "streamlit":
+            raise
+        return None
+
+    from streamlit.errors import StreamlitSecretNotFoundError
+
+    try:
+        value = st.secrets.get(name)
+    except StreamlitSecretNotFoundError:
+        return None
+    return value.strip() if isinstance(value, str) and value.strip() else None
+
+
+def get_gemini_api_key() -> str | None:
+    """Return a Gemini key from the server environment or Streamlit secrets."""
+    for name in ("GEMINI_API_KEY", "GOOGLE_API_KEY"):
+        value = os.getenv(name)
+        if value and value.strip():
+            return value.strip()
+    return _streamlit_secret("GEMINI_API_KEY") or _streamlit_secret("GOOGLE_API_KEY")
+
+
+def get_gemini_model() -> str:
+    """Return the configured model, including an optional Streamlit secret."""
+    model_name = os.getenv("GEMINI_MODEL", "").strip()
+    return model_name or _streamlit_secret("GEMINI_MODEL") or MODEL_NAME
+
+
+def gemini_is_configured() -> bool:
+    return bool(get_gemini_api_key())
+
+
 def build_prompt(user_input: str, strategy: str = "few-shot", context: str = "") -> dict[str, str]:
     """Build a versioned prompt and separate system/user messages."""
     base = PROMPT_VERSIONS[-1]["prompt"]
@@ -96,21 +132,23 @@ def build_prompt(user_input: str, strategy: str = "few-shot", context: str = "")
 
 
 def call_gemini(system: str, user: str) -> dict[str, Any]:
-    api_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+    api_key = get_gemini_api_key()
+    model_name = get_gemini_model()
     if not api_key:
         return {
             "available": False,
             "provider": "Not configured",
-            "model": MODEL_NAME,
+            "model": model_name,
             "answer": (
                 "Gemini API mode is not configured. Set GEMINI_API_KEY in the server "
-                "environment to enable live generation. The local prototype remains available."
+                "environment or Streamlit secrets to enable live generation. "
+                "The local prototype remains available."
             ),
         }
 
     url = (
         f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{MODEL_NAME}:generateContent?key={api_key}"
+        f"{model_name}:generateContent"
     )
     payload = {
         "systemInstruction": {"parts": [{"text": system}]},
@@ -123,21 +161,29 @@ def call_gemini(system: str, user: str) -> dict[str, Any]:
         },
     }
     data = json.dumps(payload).encode("utf-8")
-    req = request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+    req = request.Request(
+        url,
+        data=data,
+        headers={
+            "Content-Type": "application/json",
+            "x-goog-api-key": api_key,
+        },
+        method="POST",
+    )
     try:
         tls_context = ssl.create_default_context(cafile=certifi.where())
         with request.urlopen(req, timeout=30, context=tls_context) as response:
             result = json.loads(response.read().decode("utf-8"))
     except HTTPError as exc:
-        return {"available": False, "provider": "Gemini", "model": MODEL_NAME,
+        return {"available": False, "provider": "Gemini", "model": model_name,
                 "answer": f"Gemini returned HTTP {exc.code}. Check the API key and model name."}
     except (URLError, TimeoutError, OSError) as exc:
-        return {"available": False, "provider": "Gemini", "model": MODEL_NAME,
+        return {"available": False, "provider": "Gemini", "model": model_name,
                 "answer": f"Gemini could not be reached: {exc}"}
 
     candidates = result.get("candidates") or []
     if not candidates:
-        return {"available": False, "provider": "Gemini", "model": MODEL_NAME,
+        return {"available": False, "provider": "Gemini", "model": model_name,
                 "answer": "Gemini returned no usable candidate."}
     text = "".join(
         part.get("text", "")
@@ -146,6 +192,6 @@ def call_gemini(system: str, user: str) -> dict[str, Any]:
     return {
         "available": True,
         "provider": "Gemini",
-        "model": MODEL_NAME,
+        "model": model_name,
         "answer": text or "Gemini returned an empty answer.",
     }

@@ -1,8 +1,7 @@
-"""ORCA marine advisory app.
+"""Shared ORCA marine analysis logic and optional Flask API.
 
-This is the project entry point: it provides both the command-line demo and the
-web UI used for the basic frontend. The underlying marine-analysis logic remains
-in the other modules and is reused here.
+The primary user interface is the Streamlit app in ``streamlit_app.py``. This
+module keeps the Flask routes and shared analysis functions available.
 """
 from __future__ import annotations
 
@@ -32,7 +31,14 @@ from intent import PART_HOURS, detect_intents, parse_query
 from language import LANG_NAMES, t
 from models import AnalysisResult, Location, Session
 from ocean_knowledge import answer_ocean_question
-from prompt_engineering import MODEL_NAME, PROMPT_VERSIONS, TEST_INPUTS, build_prompt, call_gemini
+from prompt_engineering import (
+    PROMPT_VERSIONS,
+    TEST_INPUTS,
+    build_prompt,
+    call_gemini,
+    gemini_is_configured,
+    get_gemini_model,
+)
 
 
 def _safe_level(wave_m: float, gust_kmh: float) -> str:
@@ -479,11 +485,8 @@ def create_app() -> Flask:
         return jsonify({
             "prompt_versions": PROMPT_VERSIONS,
             "test_inputs": TEST_INPUTS,
-            "model": MODEL_NAME,
-            "model_configured": bool(
-                __import__("os").getenv("GEMINI_API_KEY")
-                or __import__("os").getenv("GOOGLE_API_KEY")
-            ),
+            "model": get_gemini_model(),
+            "model_configured": gemini_is_configured(),
             "techniques": ["zero-shot prompting", "few-shot prompting", "role prompting",
                            "structured output", "prompt-injection defense", "uncertainty handling"],
         })
